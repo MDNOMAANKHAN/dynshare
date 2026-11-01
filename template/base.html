@@ -1,13 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#edf6ff">
+
     <title>{% block title %}DynaShare{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-    <div class="container">
+
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="container">
+
+        <header class="site-header">
+            <a class="brand" href="{{ url_for('dashboard') }}">
+                <span class="brand-mark">D</span>
+                <span>DynaShare</span>
+            </a>
+
+            <span class="header-note">Your files, shared simply.</span>
+        </header>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flashes">
@@ -17,8 +40,10 @@
                 </ul>
             {% endif %}
         {% endwith %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
         {% block content %}{% endblock %}
-    </div>
+
+    </main>
+
 </body>
 </html>
