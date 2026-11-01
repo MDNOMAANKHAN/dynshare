@@ -13,7 +13,8 @@ from io import BytesIO
 from config import Config
 from models import db, User, File, ShareLink # <--- MAKE SURE THIS LINE IS HERE
 
-app = Flask(__name__)
+app = Flask(__name__,
+template_folder='template')
 app.config.from_object(Config)
 
 # Ensure the upload folder exists
