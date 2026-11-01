@@ -1,67 +1,272 @@
+
 {% extends "base.html" %}
 
 {% block title %}Dashboard - DynaShare{% endblock %}
 
 {% block content %}
-<h1 style="text-align: left;">Welcome, {{ user.username }}!</h1>
-<p style="text-align: right;"><a href="{{ url_for('logout') }}">Logout</a></p>
 
-<div class="section-card" style="margin-bottom: 30px;">
-    <h2>Upload New File</h2>
-    <form action="{{ url_for('dashboard') }}" method="POST" enctype="multipart/form-data">
-        <label for="file">Choose File:</label>
-        <input type="file" id="file" name="file" required>
-        <button type="submit">Upload File</button>
+<section class="welcome-row">
+    <div>
+        <p class="eyebrow">YOUR PERSONAL SPACE</p>
+
+        <h1>Welcome back, <span>{{ user.username }}.</span></h1>
+
+        <p class="welcome-copy">
+            Keep your files close and share them whenever you need.
+        </p>
+    </div>
+
+    <a class="logout-link" href="{{ url_for('logout') }}">
+        Log out ↗
+    </a>
+</section>
+
+
+<!-- UPLOAD SECTION -->
+
+<section class="section-card upload-card">
+
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">ADD SOMETHING NEW</p>
+            <h2>Upload a file</h2>
+
+            <p class="section-copy">
+                Choose a file from your device to add it to your space.
+            </p>
+        </div>
+
+        <span class="heading-icon">↑</span>
+    </div>
+
+    <form class="upload-form"
+          action="{{ url_for('dashboard') }}"
+          method="POST"
+          enctype="multipart/form-data">
+
+        <label class="upload-zone" for="file">
+
+            <span class="upload-icon">⇧</span>
+
+            <span class="upload-title">
+                Choose a file to upload
+            </span>
+
+            <span class="upload-hint">
+                Click here and select a file from your device
+            </span>
+
+            <span class="file-name" id="file-name">
+                No file selected
+            </span>
+
+            <input type="file" id="file" name="file" required>
+
+        </label>
+
+        <button class="primary-button" type="submit">
+            Upload file ↑
+        </button>
+
     </form>
-</div>
 
-<div class="section-card">
-    <h2>Your Files</h2>
+</section>
+
+
+<!-- FILES SECTION -->
+
+<section class="section-card files-card">
+
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">YOUR LIBRARY</p>
+            <h2>Your files</h2>
+
+            <p class="section-copy">
+                Download, share, or remove the files you've uploaded.
+            </p>
+        </div>
+
+        <span class="file-count">
+            {% if files_with_shares %}
+                {{ files_with_shares|length }}
+            {% else %}
+                0
+            {% endif %}
+            items
+        </span>
+    </div>
+
+
     {% if files_with_shares %}
-        <ul>
+
+        <ul class="file-list">
+
             {% for item in files_with_shares %}
-                <li style="animation-delay: {{ loop.index * 0.05 }}s;"> {# Subtle staggered animation #}
-                    <strong>{{ item.file.original_filename }}</strong> ({{ "%.2f" | format(item.file.size / (1024 * 1024)) }} MB)
-                    <div>
-                        <a href="{{ url_for('download_file', file_id=item.file.id) }}">Download</a>
-                        <a href="{{ url_for('share_file', file_id=item.file.id) }}">Share</a>
-                        <a href="{{ url_for('delete_file', file_id=item.file.id) }}" onclick="return confirm('Are you sure you want to delete this file and all its share links?');" class="revoke-btn">Delete</a>
+
+                <li class="file-item"
+                    style="animation-delay: {{ loop.index * 0.05 }}s;">
+
+                    <div class="file-main">
+
+                        <span class="file-icon">▤</span>
+
+                        <div class="file-details">
+
+                            <strong>
+                                {{ item.file.original_filename }}
+                            </strong>
+
+                            <span>
+                                {{ "%.2f" | format(item.file.size / (1024 * 1024)) }} MB
+                            </span>
+
+                        </div>
+
                     </div>
 
+
+                    <div class="file-actions">
+
+                        <a class="action-link"
+                           href="{{ url_for('download_file', file_id=item.file.id) }}">
+                            Download
+                        </a>
+
+                        <a class="action-link action-share"
+                           href="{{ url_for('share_file', file_id=item.file.id) }}">
+                            Share
+                        </a>
+
+                        <a href="{{ url_for('delete_file', file_id=item.file.id) }}"
+                           onclick="return confirm('Are you sure you want to delete this file and all its share links?');"
+                           class="action-link action-delete">
+                            Delete
+                        </a>
+
+                    </div>
+
+
                     {% if item.shares %}
+
                         <div class="share-links-list">
-                            <p style="font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Share Links:</p>
+
+                            <p class="share-heading">SHARE LINKS</p>
+
                             <ul>
+
                                 {% for share in item.shares %}
+
                                     <li>
-                                        <code>{{ url_for('access_file', share_uuid=share.uuid, _external=True) }}</code>
+
+                                        <code>
+                                            {{ url_for('access_file', share_uuid=share.uuid, _external=True) }}
+                                        </code>
+
                                         <span class="status {% if share.is_active and not share.is_expired() %}active{% elif share.is_expired() %}expired{% else %}revoked{% endif %}">
-                                            {% if share.is_active and not share.is_expired() %}Active
-                                            {% elif share.is_expired() %}Expired
-                                            {% else %}Revoked
+
+                                            {% if share.is_active and not share.is_expired() %}
+                                                Active
+                                            {% elif share.is_expired() %}
+                                                Expired
+                                            {% else %}
+                                                Revoked
                                             {% endif %}
+
                                         </span>
+
+
                                         {% if share.recipient_info %}
-                                            <span style="font-size: 0.8em; margin-left: 5px;">({{ share.recipient_info }})</span>
+                                            <span class="share-meta">
+                                                ({{ share.recipient_info }})
+                                            </span>
                                         {% endif %}
+
+
                                         {% if share.expires_at %}
-                                            <span style="font-size: 0.8em; margin-left: 5px;">(Expires: {{ share.expires_at.strftime('%Y-%m-%d %H:%M') }})</span>
+                                            <span class="share-meta">
+                                                Expires: {{ share.expires_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </span>
                                         {% endif %}
+
+
                                         {% if share.is_active and not share.is_expired() %}
-                                            <a href="{{ url_for('revoke_share', share_uuid=share.uuid) }}" onclick="return confirm('Are you sure you want to revoke this share link?');" class="revoke-btn">Revoke</a>
+
+                                            <a href="{{ url_for('revoke_share', share_uuid=share.uuid) }}"
+                                               onclick="return confirm('Are you sure you want to revoke this share link?');"
+                                               class="action-link action-delete">
+                                                Revoke
+                                            </a>
+
                                         {% endif %}
+
                                     </li>
+
                                 {% endfor %}
+
                             </ul>
+
                         </div>
+
                     {% else %}
-                        <p style="font-size: 0.9em; margin-top: 10px; width: 100%; text-align: center; color: #777;">No share links for this file.</p>
+
+                        <p class="no-shares">
+                            No share links created for this file yet.
+                        </p>
+
                     {% endif %}
+
                 </li>
+
             {% endfor %}
+
         </ul>
+
     {% else %}
-        <p>You haven't uploaded any files yet. Upload one above!</p>
+
+        <div class="empty-state">
+
+            <span class="empty-icon">◇</span>
+
+            <h3>Your library is waiting</h3>
+
+            <p>
+                You haven't uploaded any files yet.
+                Choose a file above to get started.
+            </p>
+
+        </div>
+
     {% endif %}
-</div>
+
+</section>
+
+
+<!-- SELECTED FILE NAME AND GLOW EFFECT -->
+
+<script>
+
+    const fileInput = document.getElementById('file');
+    const fileName = document.getElementById('file-name');
+    const uploadZone = document.querySelector('.upload-zone');
+
+    if (fileInput && fileName && uploadZone) {
+
+        fileInput.addEventListener('change', () => {
+
+            const selected =
+                fileInput.files && fileInput.files.length > 0;
+
+            fileName.textContent = selected
+                ? fileInput.files[0].name
+                : 'No file selected';
+
+            uploadZone.classList.toggle('has-file', Boolean(selected));
+
+        });
+
+    }
+
+</script>
+
 {% endblock %}
