@@ -1,3 +1,0 @@
-This is a test file for DynaShare.
-I'm testing the file upload and encryption.
-Hopefully, this works perfectly!
